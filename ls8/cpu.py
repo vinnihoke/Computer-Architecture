@@ -7,28 +7,32 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.cpu = [0] * 256
+        self.reg = [0] * 8
+        self.pc = 0
+        self.running = True
+        self.branch_table = {}
+        self.branch_table[fun1] = 
+
+    def ram_read(self, pc): # Program Counter, index of the current instruction
+        print(self.cpu[self.pc])
+        self.pc += 1
+
+    def ram_write(self, pc, value):
+        self.cpu[self.pc] = value
+        self.pc += 2
 
     def load(self):
         """Load a program into memory."""
-
-        address = 0
-
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        filename = sys.argv[1]
+        with open(f'/Users/vinnihoke/git-projects/classes/lambda/cs/Computer-Architecture/ls8/examples/{filename}') as f:
+            for address, line in enumerate(f):
+                line = line.split("#")
+                try:
+                    v = int(line[0])
+                except ValueError:
+                    continue
+                self.cpu[address] = v
 
 
     def alu(self, op, reg_a, reg_b):
@@ -62,4 +66,13 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        ir = self.cpu[self.pc] # Stands for internal register
+
+        while self.running:
+            branch_table = {
+                1: self.ram_read(ir),
+                2: self.ram_write(ir, value)
+            }
+
+            branch_table[ir]
+        

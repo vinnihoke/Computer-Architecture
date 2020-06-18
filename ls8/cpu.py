@@ -20,7 +20,11 @@ class CPU:
         self.ram = [0] * 256 # Bytes of memory
         self.reg = [0] * 8 # Registers
         self.pc = 0 # Program Counter
-        self.sp = 244 # Stack pointer. Address 244 if stack is empty
+        self.sp = self.reg[7] # Stack pointer. Address 244 if stack is empty
+        self.reg[7] = 0xF4
+        self.greaterThan = 0
+        self.lessThan = 0
+        self.equals = 0
         self.running = False
         self.operand_a = 0
         self.operand_b = 0
@@ -67,9 +71,9 @@ class CPU:
         '''
         Pop the value from the top of the stack and store it in the `PC`.
         '''
-        next_instance = self.ram[self.sp]
+        next_instruction = self.ram[self.sp]
         self.sp += 1
-        self.pc = next_instance
+        self.pc = next_instruction
 
     def CALL(self):
         '''
@@ -147,6 +151,21 @@ class CPU:
         self.alu("MUL", self.operand_a, self.operand_b)
         self.pc += 3
 
+    def CMP(self):
+        '''
+        Compare the values in two registers.
+
+        * If they are equal, set the Equal `E` flag to 1, otherwise set it to 0.
+
+        * If registerA is less than registerB, set the Less-than `L` flag to 1,
+        otherwise set it to 0.
+
+        * If registerA is greater than registerB, set the Greater-than `G` flag
+        to 1, otherwise set it to 0.
+        '''
+        self.alu("CMP", self.operand_a, self.operand_b)
+        self.pc += 3
+
 
     def load(self, file):
         """Load a program into memory."""
@@ -176,6 +195,18 @@ class CPU:
             self.reg[reg_a] += self.reg[reg_b]
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
+        elif op == "CMP":
+            # Reset counters
+            self.equals = 0
+            self.lessThan = 0
+            self.greaterThan = 0
+
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.equals += 1
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                self.lessThan += 1
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.greaterThan += 1
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -209,6 +240,7 @@ class CPU:
             self.operand_b = self.ram_read(self.pc + 2)
 
             self.branch_table[ir]()
+            print(ir)
 
     def ram_read(self, mar):
         # MAR: Memory Address Register contains the address that is being read or written to

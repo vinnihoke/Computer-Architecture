@@ -86,7 +86,7 @@ class CPU:
 
         # Push to stack
         self.sp -= 1
-        self.ram[self.sp] = next_instance
+        self.ram[self.sp] = next_instruction
         
         # PC is set to the address stored in the given register
         self.pc = self.reg[self.operand_a]
@@ -203,14 +203,12 @@ class CPU:
         """Run the CPU."""
         self.running = True
 
-        ir = self.ram[self.pc]
-
         while self.running:
             ir = self.ram[self.pc]  # Instruction Register
             self.operand_a = self.ram_read(self.pc + 1)
             self.operand_b = self.ram_read(self.pc + 2)
 
-            self.branchtable[ir]()
+            self.branch_table[ir]()
 
     def ram_read(self, mar):
         # MAR: Memory Address Register contains the address that is being read or written to

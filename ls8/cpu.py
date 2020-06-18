@@ -39,8 +39,42 @@ class CPU:
             0b01010000: self.CALL,
             0b00010001: self.RET,
             0b10100000: self.ADD,
-            0b10000100: self.ST
+            0b10000100: self.ST,
+            0b01010100: self.JMP,
+            0b10100111: self.CMP,
+            0b01010110: self.JNE,
+            0b01010101: self.JEQ
         }
+
+    def JMP(self):
+        '''
+        Jump to the address stored in the given register.
+
+        Set the `PC` to the address stored in the given register.
+        '''
+        address = self.reg[self.operand_a]
+        self.pc = address
+
+    def JNE(self):
+        '''
+        If `E` flag is clear (false, 0), jump to the address stored in the given
+        register.
+        '''
+        if not self.equals:
+            address = self.reg[self.operand_a]
+            self.pc = address
+        else:
+            self.pc += 2
+    
+    def JEQ(self):
+        '''
+        If `equal` flag is set (true), jump to the address stored in the given register.
+        '''
+        if self.equals:
+            address = self.reg[self.operand_a]
+            self.pc = address
+        else:
+            self.pc += 2
 
     def ST(self):
         '''
@@ -133,6 +167,7 @@ class CPU:
         Set the value of a register to an integer.
         '''
         self.reg[self.operand_a] = self.operand_b
+        self.pc += 3
 
     def PRN(self):
         '''
@@ -142,7 +177,7 @@ class CPU:
         register.
         '''
         print(self.reg[self.operand_a])
-        self.pc += 3
+        self.pc += 2
 
     def MUL(self):
         '''
@@ -240,7 +275,6 @@ class CPU:
             self.operand_b = self.ram_read(self.pc + 2)
 
             self.branch_table[ir]()
-            print(ir)
 
     def ram_read(self, mar):
         # MAR: Memory Address Register contains the address that is being read or written to
